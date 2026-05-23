@@ -63,7 +63,7 @@ def gradient_clipping(params: list[torch.Tensor], max_l2_norm: float) -> None:
     for p in params:
         if p.grad is not None:
             g = p.grad
-            total_norm_sq += float((g * g).sum().detach().cpu())
+            total_norm_sq += g.norm().item() ** 2
     total_norm = total_norm_sq ** 0.5
     scale = max_l2_norm / (total_norm + 1e-6)
     if scale < 1.0:
