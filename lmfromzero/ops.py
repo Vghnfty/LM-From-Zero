@@ -3,7 +3,6 @@
 虽然 PyTorch 都有现成的，但自己写一遍才知道里面发生了什么。
 比如为啥 softmax 要先减最大值，交叉熵和 log_softmax 是什么关系。
 """
-import math
 import torch
 import torch.nn.functional as F
 
@@ -60,13 +59,11 @@ def gradient_clipping(params: list[torch.Tensor], max_l2_norm: float) -> None:
 
     注意这是 in-place 的，直接改 param.grad，不返回值。
     """
-    device = params[0].device
-    total_norm_sq = torch.tensor(0.0, device=device)
+    total_norm_sq = 0.0
     for p in params:
         if p.grad is not None:
-            total_norm_sq = total_norm_sq + p.grad.norm() ** 2
-
-    total_norm = total_norm_sq.sqrt()
+            total_norm_sq += p.grad.pow(2).sum().item()
+    total_norm = total_norm_sq ** 0.5
     scale = max_l2_norm / (total_norm + 1e-6)
     if scale < 1.0:
         for p in params:
