@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "lmfromzero"
+version = "0.1.0"
+description = "LLaMA-style Transformer language model built from scratch — tokenizer, attention, training loop, generation. ~150M params."
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Your Name"}]
+keywords = ["llm", "transformer", "llama", "language-model", "bpe-tokenizer", "from-scratch"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "torch>=2.0",
+    "numpy",
+    "tqdm",
+    "regex",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ipykernel",
+    "matplotlib",
+]
+demo = [
+    "gradio",
+]
+logging = [
+    "wandb",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

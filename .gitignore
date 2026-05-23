@@ -1,0 +1,23 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.ipynb_checkpoints/
+.claude/
+data/
+checkpoints/
+!checkpoints/tokenizer_*
+wandb/
+*.egg-info/
+dist/
+.DS_Store
+.idea/
+.vscode/
+.cs336_repo_submission/
+# 不要把整个 cs336_repo 的 git 历史带进来
+cs336_repo/.git/
+cs336_repo/.gitignore
+cs336_repo/.pytest_cache/
+cs336_repo/__pycache__/
+cs336_repo/tests/__pycache__/
+cs336_repo/tests/_snapshots/__pycache__/
