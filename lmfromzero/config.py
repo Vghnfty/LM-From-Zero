@@ -68,7 +68,7 @@ class ModelConfig:
         d_model=512、6 层、context=256，T4 上大约 30-40 分钟跑完 5000 步。
         """
         return cls(
-            vocab_size=16384,
+            vocab_size=4096,
             max_seq_len=256,
             num_layers=6,
             d_model=512,

@@ -28,7 +28,7 @@ elif os.path.exists("../lmfromzero"):
     sys.path.insert(0, "..")
 
 from lmfromzero.config import ModelConfig
-from lmfromzero.tokenizer import train_bpe, Tokenizer
+from lmfromzero.tokenizer import Tokenizer
 from lmfromzero.ops import cross_entropy, gradient_clipping
 from lmfromzero.data import load_and_tokenize, get_batch
 from lmfromzero.model import transformer_lm
@@ -96,42 +96,14 @@ def cell_download_data():
 # Cell 3: 训练 Tokenizer
 # ═══════════════════════════════════════════════════════════════
 
-def cell_train_tokenizer(vocab_size=16384, sample_mb=5):
-    """在数据的一个子集上训练 BPE tokenizer。
-
-    完整数据 2.2GB，取前 sample_mb MB 来训 tokenizer 就够了，
-    因为 tokenizer 只需要学习字节对的统计规律，不需要全部数据。
-    """
+def cell_load_tokenizer():
+    """加载仓库里预训练的 tokenizer（用优化版 BPE 训练在 TinyStories 样本上）。"""
     vocab_path = "checkpoints/tokenizer_vocab.pkl"
     merges_path = "checkpoints/tokenizer_merges.pkl"
 
-    if os.path.exists(vocab_path) and os.path.exists(merges_path):
-        with open(vocab_path, "rb") as f:
-            vocab = pickle.load(f)
-        print(f"[已存在] 词表大小: {len(vocab)}")
-        return vocab
-
-    print(f"[读取] 取前 {sample_mb}MB 文本...")
-    with open("data/TinyStoriesV2-GPT4-train.txt", "r", encoding="utf-8") as f:
-        text = f.read(sample_mb * 1_000_000)
-
-    text_bytes = len(text.encode("utf-8"))
-    print(f"[文本] {len(text):,} 字符, {text_bytes:,} 字节")
-
-    print(f"[训练] BPE tokenizer (vocab_size={vocab_size})...")
-    t0 = time.time()
-    vocab, merges = train_bpe(text, vocab_size=vocab_size,
-                              allowed_special={"<|endoftext|>"})
-    elapsed = time.time() - t0
-    print(f"[完成] 词表大小: {len(vocab)}, 合并 {len(merges)} 次, 耗时 {elapsed:.1f}s")
-
-    os.makedirs("checkpoints", exist_ok=True)
-    with open(vocab_path, "wb") as f:
-        pickle.dump(vocab, f)
-    with open(merges_path, "wb") as f:
-        pickle.dump(merges, f)
-    print(f"[保存] {vocab_path}, {merges_path}")
-
+    with open(vocab_path, "rb") as f:
+        vocab = pickle.load(f)
+    print(f"[Tokenizer] 词表大小: {len(vocab)}")
     return vocab
 
 
@@ -410,7 +382,7 @@ def cell_generate(weights, prompt="Once upon a time", max_tokens=150,
 if __name__ == "__main__":
     cell_setup()
     cell_download_data()
-    cell_train_tokenizer()
+    cell_load_tokenizer()
     losses, ppls, weights = cell_train_model()
     cell_plot_loss(losses, ppls)
 
