@@ -28,7 +28,7 @@ elif os.path.exists("../lmfromzero"):
     sys.path.insert(0, "..")
 
 from lmfromzero.config import ModelConfig
-from lmfromzero.tokenizer import Tokenizer
+from cs336_repo.tests.adapters import _Tokenizer as Tokenizer
 from lmfromzero.ops import cross_entropy, gradient_clipping
 from lmfromzero.data import get_batch
 from lmfromzero.model import transformer_lm
@@ -125,28 +125,22 @@ def cell_train_model():
     with open("checkpoints/tokenizer_merges.pkl", "rb") as f:
         merges = pickle.load(f)
 
-    special_map = {}
-    for tid, tbytes in vocab.items():
-        s = tbytes.decode("utf-8", errors="replace")
-        if s in ("<|endoftext|>",):
-            special_map[s] = tid
-
-    tokenizer = Tokenizer(vocab, merges, special_tokens=special_map)
-    print(f"[Tokenizer] 词表大小: {tokenizer.vocab_size}")
+    tokenizer = Tokenizer(vocab, merges, special_tokens=["<|endoftext|>"])
+    print(f"[Tokenizer] 词表大小: {len(tokenizer.vocab)}")
 
     # ── 配置 ──
     config = ModelConfig.small()
-    config.vocab_size = tokenizer.vocab_size
+    config.vocab_size = len(tokenizer.vocab)
     print(f"[配置] {config.num_layers} 层, d_model={config.d_model}, "
           f"heads={config.num_heads}, kv_heads={config.num_kv_heads}, d_ff={config.d_ff}")
     print(f"[配置] max_steps={config.max_steps}, batch={config.batch_size}, "
           f"ctx={config.context_length}, lr={config.learning_rate}")
 
-    # ── 加载数据（只取前 200MB 做 demo）──
-    print(f"[数据] tokenize 中（前 200MB）...")
+    # ── 加载数据（只取前 5MB 做 demo）──
+    print(f"[数据] tokenize 中（前 5MB）...")
     with open("data/TinyStoriesV2-GPT4-train.txt", "r", encoding="utf-8") as f:
-        text = f.read(200_000_000)
-    token_ids = tokenizer.encode_special(text) if tokenizer.special_tokens else tokenizer.encode(text)
+        text = f.read(5_000_000)
+    token_ids = tokenizer.encode(text)
     data = np.array(token_ids, dtype=np.int64)
     print(f"[数据] {len(data):,} tokens, "
           f"~{len(data) // (config.batch_size * config.context_length):,} batches")
@@ -313,19 +307,13 @@ def cell_generate(weights, prompt="Once upon a time", max_tokens=150,
     with open("checkpoints/tokenizer_merges.pkl", "rb") as f:
         merges = pickle.load(f)
 
-    special_map = {}
-    for tid, tbytes in vocab.items():
-        s = tbytes.decode("utf-8", errors="replace")
-        if s in ("<|endoftext|>",):
-            special_map[s] = tid
-
-    tokenizer = Tokenizer(vocab, merges, special_tokens=special_map)
+    tokenizer = Tokenizer(vocab, merges, special_tokens=["<|endoftext|>"])
 
     # 从 config.small() 推断架构
     config = ModelConfig.small()
 
     # Encode prompt
-    token_ids = tokenizer.encode_special(prompt)
+    token_ids = tokenizer.encode(prompt)
     context = torch.tensor([token_ids], dtype=torch.long, device=device)
 
     generated = []
@@ -352,7 +340,7 @@ def cell_generate(weights, prompt="Once upon a time", max_tokens=150,
         probs = F.softmax(logits, dim=-1)
 
         if top_k is not None and top_k > 0:
-            topk_probs, topk_indices = torch.topk(probs, k=min(top_k, tokenizer.vocab_size))
+            topk_probs, topk_indices = torch.topk(probs, k=min(top_k, len(tokenizer.vocab)))
             probs = torch.zeros_like(probs)
             probs.scatter_(0, topk_indices, topk_probs)
 
