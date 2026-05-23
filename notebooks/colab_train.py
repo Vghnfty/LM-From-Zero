@@ -200,7 +200,8 @@ def cell_train_model():
         optimizer.zero_grad()
         loss.backward()
         torch.cuda.synchronize()
-        gradient_clipping(params_list, config.grad_clip)
+        # FIXME: gradient_clipping 在 Colab T4 上有跨设备 bug，暂时跳过
+        # gradient_clipping(params_list, config.grad_clip)
         optimizer.step()
         dt = time.time() - t0
 
