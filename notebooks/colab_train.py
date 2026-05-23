@@ -57,7 +57,7 @@ def cell_setup():
     # 检查 GPU
     if torch.cuda.is_available():
         print(f"✓ GPU: {torch.cuda.get_device_name(0)}")
-        print(f"  显存: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
+        print(f"  显存: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
     else:
         print("⚠ 没有检测到 GPU，训练会很慢。请确认 Colab 运行时已选 T4 GPU。")
 
