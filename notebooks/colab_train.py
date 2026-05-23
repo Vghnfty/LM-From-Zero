@@ -30,7 +30,7 @@ elif os.path.exists("../lmfromzero"):
 from lmfromzero.config import ModelConfig
 from lmfromzero.tokenizer import Tokenizer
 from lmfromzero.ops import cross_entropy, gradient_clipping
-from lmfromzero.data import load_and_tokenize, get_batch
+from lmfromzero.data import get_batch
 from lmfromzero.model import transformer_lm
 from lmfromzero.optimizer import AdamW
 from lmfromzero.scheduler import get_lr_cosine_schedule
@@ -142,9 +142,11 @@ def cell_train_model():
     print(f"[配置] max_steps={config.max_steps}, batch={config.batch_size}, "
           f"ctx={config.context_length}, lr={config.learning_rate}")
 
-    # ── 加载数据 ──
-    print(f"[数据] tokenize 中...")
-    token_ids = load_and_tokenize("data/TinyStoriesV2-GPT4-train.txt", tokenizer)
+    # ── 加载数据（只取前 200MB 做 demo）──
+    print(f"[数据] tokenize 中（前 200MB）...")
+    with open("data/TinyStoriesV2-GPT4-train.txt", "r", encoding="utf-8") as f:
+        text = f.read(200_000_000)
+    token_ids = tokenizer.encode_special(text) if tokenizer.special_tokens else tokenizer.encode(text)
     data = np.array(token_ids, dtype=np.int64)
     print(f"[数据] {len(data):,} tokens, "
           f"~{len(data) // (config.batch_size * config.context_length):,} batches")
