@@ -149,6 +149,8 @@ def cell_train_model():
     print(f"[模型] 初始化...")
     weights = _init_weights(config)
     weights = {k: v.to(device) for k, v in weights.items()}
+    for v in weights.values():
+        v.requires_grad_(True)
     n_params = sum(p.numel() for p in weights.values())
     print(f"[模型] 参数量: {n_params:,} (~{n_params / 1e6:.1f}M)")
 
