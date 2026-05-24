@@ -179,11 +179,15 @@ cd cs336_repo && uv run pytest tests/ -v
 | 权重衰减 | AdamW（解耦） | L2 正则化 ≠ 权重衰减（对自适应优化器） |
 | 学习率调度 | Cosine + Warmup | 预热防梯度爆炸，余弦退火精细收敛 |
 
-## Colab 训练
+## Colab 训练结果
 
-如果本地没有 GPU，可以在 Colab 上免费训练：
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](notebooks/colab_train.py)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](notebooks/colab_train.ipynb)
+T4 GPU 上 5000 步训练约 40 分钟。
+
+![Training Curve](assets/training_curve.png)
+
+> 初始 loss 8.46 (~ln 4096)，最终 loss 0.124，PPL 1.1。PPL 偏低是因为 demo 阶段仅使用 5MB 数据，量级偏小导致轻微过拟合；全量数据训练结果更真实。
 
 ## 依赖
 
